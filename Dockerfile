@@ -7,10 +7,9 @@ LABEL email='mru2683@gmail.com'
 
 # Prepare Nut install
 RUN apt-get update && apt-get -y install \
-	gcc \
-	cron \
 	wget \
 	unzip \
+	gcc \
 	libssl-dev \
 	libcurl4-openssl-dev \
 	zlib1g-dev \
@@ -21,7 +20,7 @@ RUN wget https://github.com/blawar/nut/archive/refs/tags/v3.3.zip
 RUN unzip v3.3.zip -d /root
 RUN mv /root/nut-3.3 /root/nut
 
-# Tune config
+# Edit config
 RUN mv /root/nut/conf/nut.default.conf /root/nut/conf/nut.conf
 RUN sed -i '/scan/c "scan": ["\/titles"]' /root/nut/conf/nut.conf
 
@@ -36,11 +35,7 @@ RUN echo markupsafe==2.0.1 >>/root/nut/requirements.txt
 RUN pip3 install -U pip
 RUN pip3 install -r /root/nut/requirements.txt
 
-COPY /entrypoint.sh /
-
-RUN chmod +x /entrypoint.sh
-
-VOLUME [ "/titles" ]
+VOLUME [ "/titles", "/root/nut/conf", "/root/nut/_NSPOUT" ]
 
 EXPOSE 9000
 
@@ -48,4 +43,4 @@ EXPOSE 9000
 RUN rm v3.3.zip
 RUN apt-get autoremove
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["python3", "/root/nut/nut.py", "--server"]
